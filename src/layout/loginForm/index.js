@@ -19,13 +19,14 @@ class LoginForm extends React.Component {
       if (!err) {
         console.log('Received values of form:', values);
       }
-    })
+    });
   }
-  render() {
-    const  { getFieldDecorator, getFieldsError, getFieldError, isFieldTouched } = this.props.form;
 
-    const usernameError = isFieldTouched('userName')&&getFieldError('userName');
-    const passwordError = isFieldTouched('password')&&getFieldError('password');
+  render() {
+    const { getFieldDecorator, getFieldsError, getFieldError, isFieldTouched } = this.props.form;
+
+    const usernameError = isFieldTouched('userName') && getFieldError('userName');
+    const passwordError = isFieldTouched('password') && getFieldError('password');
 
     return (
       <Form layout="inline" onSubmit={this.handleSubmit}>

@@ -9,7 +9,10 @@ import Login from './loginForm/index';
 import Route from './route/index';
 import Restaurant from './restaurant/index';
 import Category from './category/index';
-import Order from './order/index';
+import Order from './orderList/index';
+import OrderItem from './orderItem/index';
+import AddCategory from './addCategory/index';
+import AddFood from './addFood/index';
 
 const { Header, Footer, Sider, Content } = Layout;
 
@@ -41,8 +44,11 @@ class LLayout extends React.Component {
             <Content style={{padding: 24}}>
               <Route/>
               {/*<Restaurant />*/}
-              <Category/>
+              {/*<Category/>*/}
               {/*<Order/>*/}
+              {/*<OrderItem/>*/}
+              {/*<AddCategory/>*/}
+              <AddFood/>
             </Content>
           </Layout>
           {/*<Footer>Footer</Footer>*/}
