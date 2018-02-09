@@ -11,3 +11,5 @@ Failed to load http://192.168.1.109:8360/admin: Response to preflight request do
 ```
 
 texturePacker 游戏贴图打包
+
+文件上传没有解决，可以将文件打包放到服务器中去启动，不需要解决跨域问题

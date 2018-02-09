@@ -1,5 +1,6 @@
 import React from 'react';
 import { Form, Input, Button, Upload, Icon, Select } from 'antd';
+import axios from 'axios';
 const FormItem = Form.Item;
 const Option = Select.Option;
 
@@ -12,8 +13,17 @@ class addFood extends React.Component {
     this.props.form.validateFields((err, value) => {
       if (!err) {
         console.log('数据：', value);
+        axios.get('http://192.168.1.110:8360/admin/food/getFile', {
+          params: value
+        })
+          .then(function (response) {
+            console.log(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+          })
       }
-    })
+    });
   }
 
   normFile = (e) => {
@@ -22,8 +32,7 @@ class addFood extends React.Component {
       return e;
     }
     return e && e.fileList;
-  }
-
+  };
 
   render() {
     const formItemLayout = {
@@ -73,7 +82,7 @@ class addFood extends React.Component {
             getValueFromEvent: this.normFile,
           })(
             /* action 填写后端接收图片的地址 */
-            <Upload name="logo" listType="picture" action="http://192.168.1.109:8360/admin">
+            <Upload name="logo" listType="picture" action="/admin/food/getFile">
               <Button>
                 <Icon type="upload"/>Click to upload
               </Button>

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Form, Input, Icon, Switch, Button } from 'antd';
-import css from './index.less';
 
 const FormItem = Form.Item;
 
