@@ -7,12 +7,12 @@ import Btn from './button/index';
 import Menu from './menu/index';
 import Login from './loginForm/index';
 import Route from './route/index';
-import Restaurant from './restaurant/index';
-import Category from './category/index';
-import Order from './orderList/index';
-import OrderItem from './orderItem/index';
-import AddCategory from './addCategory/index';
-import AddFood from './addFood/index';
+import Restaurant from './components/restaurant/index';
+import Category from './components/category/index';
+import Order from './components/orderList/index';
+import OrderItem from './components/orderItem/index';
+import AddCategory from './components/addCategory/index';
+import AddFood from './components/addFood/index';
 
 const { Header, Footer, Sider, Content } = Layout;
 
@@ -48,7 +48,7 @@ class LLayout extends React.Component {
               {/*<Order/>*/}
               {/*<OrderItem/>*/}
               {/*<AddCategory/>*/}
-              <AddFood/>
+              {/*/!*<AddFood/>*!/*/}
             </Content>
           </Layout>
           {/*<Footer>Footer</Footer>*/}
@@ -57,4 +57,5 @@ class LLayout extends React.Component {
     );
   }
 }
+
 export default LLayout;

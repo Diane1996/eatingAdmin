@@ -37,7 +37,7 @@ class LoginForm extends React.Component {
           {getFieldDecorator('userName', {
             rules: [{required: true, message: 'Please input your username!'}],
           })(
-            <Input type="text" prefix={<Icon type="user" style={{color: 'rgba(0,0,0,0.25)'}} />}placeholder="Username"/>
+            <Input type="text" prefix={<Icon type="user" style={{color: 'rgba(0,0,0,0.25)'}} />} placeholder="Username"/>
           )}
         </FormItem>
         <FormItem
