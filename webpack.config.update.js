@@ -7,5 +7,6 @@ module.exports = (config) => {
       components: path.resolve(process.cwd(), './src') + '/components',
     }
   };
+
   return config;
 };
