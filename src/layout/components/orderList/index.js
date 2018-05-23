@@ -26,6 +26,7 @@ export default class Order extends React.Component {
       orderList: [],
       visible: false,
       list: [],
+      address: [],
       columns: [
         {
           title: '交易时间',
@@ -52,16 +53,6 @@ export default class Order extends React.Component {
           dataIndex: 'status',
           key: 'status'
         }, {
-          title: '结束订单',
-          key: 'end',
-          render: (text, record, index) => {
-            return (
-              <Button onClick={() => {
-                this.endOrder(record);
-              }}>结束订单</Button>
-            );
-          }
-        }, {
           title: '',
           key: 'action',
           render: (text, record, index) => {
@@ -80,10 +71,10 @@ export default class Order extends React.Component {
                 actionName = '用户申请退款';
             }
             return (
-                <button onClick={() => {
+                <Button onClick={() => {
                   this.orderAction(record);
                   // this.handleCancel();
-                }}>{actionName}</button>
+                }}>{actionName}</Button>
             );
           }
         }
@@ -102,32 +93,45 @@ export default class Order extends React.Component {
           dataIndex: 'count',
           key: 'count'
         }
+      ],
+      addressColumns: [
+        {
+          title: '名字',
+          dataIndex: 'name',
+          key: 'name'
+        }, {
+          title: '电话',
+          dataIndex: 'phone',
+          key: 'phone'
+        }, {
+          title: '地址',
+          dataIndex: 'address',
+          key: 'address'
+        }
       ]
     };
   }
 
   showModal = (record) => {
-    $.ajax({
-      method: 'get',
-      url: config + '/admin/order/getOneDetail?order_id=' + record.order_id,
-      dataType: 'jsonp',
-      success: (res) => {
-        console.log(typeof res)
-        let orderList = [];
-        res.result.map((item, index) => {
-          item.key = index + 1;
-          orderList.push(item);
-        });
-        console.log(orderList);
-        this.setState({
-          list: orderList
-        });
-      }
-    });
-
-    this.setState({
-      visible: true,
-    });
+    // $.ajax({
+    //   method: 'get',
+    //   url: config + '/admin/order/getOneDetail?order_id=' + record.order_id,
+    //   dataType: 'jsonp',
+    //   success: (res) => {
+    //     let orderList = [];
+    //     res.orderDetail.map((item, index) => {
+    //       item.key = index + 1;
+    //       orderList.push(item);
+    //     });
+    //     this.setState({
+    //       list: orderList,
+    //       address: res.addressDetail
+    //     });
+    //   }
+    // });
+    // this.setState({
+    //   visible: true,
+    // });
   };
 
   handleOk = () => {
@@ -142,7 +146,7 @@ export default class Order extends React.Component {
     });
   };
 
-  componentDidMount() {
+  getOrderList() {
     $.ajax({
       method: 'get',
       url: config + '/admin/order/getAllOrderList',
@@ -157,6 +161,11 @@ export default class Order extends React.Component {
           item.key = index + 1;
           item.createdTime = item.create_time;
           item.total = item.total_price;
+          // switch (item.status) {
+          //   case 1:
+          //     item.status = '已付款';
+          //
+          // }
           orderList.push(item);
         });
         console.log(orderList);
@@ -165,34 +174,16 @@ export default class Order extends React.Component {
         });
       }
     });
+  }
 
+  componentDidMount() {
+    this.getOrderList();
     // 定时获取最新内容
     let timer;
     let repeat;
     // setTimeout(repeat = () => {
     //   setTimeout(repeat, 5000);
-    //   $.ajax({
-    //     method: 'get',
-    //     url: config + '/admin/order/getAllOrderList',
-    //     data: {
-    //       username: 'admin',
-    //       password: 'admin'
-    //     },
-    //     dataType: 'jsonp',
-    //     success: (res) => {
-    //       let orderList = [];
-    //       res.map((item, index) => {
-    //         item.key = index + 1;
-    //         item.createdTime = item.create_time;
-    //         item.total = item.total_price;
-    //         orderList.push(item);
-    //       });
-    //       // console.log(orderList);
-    //       this.setState({
-    //         orderList: orderList
-    //       });
-    //     }
-    //   });
+    //   this.getOrderList();
     // }, 5000);
   }
 
@@ -224,11 +215,17 @@ export default class Order extends React.Component {
         // 用户申请退款(同意，拒绝)
         code = ORDER_CODE.RECEIVE;
     }
+    console.log(code, item.order_id);
     $.ajax({
       method: 'get',
       url: config + '/admin/order/order',
+      data: {
+        code: code,
+        order_id: item.order_id
+      },
       dataType: 'jsonp',
       success: (res) => {
+        this.getOrderList();
         console.log('success:', res);
       }
     });
@@ -243,19 +240,6 @@ export default class Order extends React.Component {
 
     return (
       <div>
-        {/* <Card title={`Order ${this.state.index}`} style={customPanelStyle}>
-          <div>
-            <p>外卖</p>
-            <p>price: <span>12.5</span></p>
-            <p>orderList: </p>
-            <p>receiverInfo:</p>
-            <div>
-              <p>name: 王小明</p>
-              <p>telephone: 13512341234</p>
-              <p>address: 成都</p>
-            </div>
-          </div>
-        </Card> */}
         <Modal
           title="点单列表"
           visible={this.state.visible}
@@ -263,6 +247,7 @@ export default class Order extends React.Component {
           onCancel={this.handleCancel}
         >
           <Table dataSource={this.state.list} columns={this.state.orderColumns}/>
+          <Table dataSource={this.state.address} columns={this.state.addressColumns}/>
         </Modal>
         <Table dataSource={this.state.orderList} columns={this.state.columns} onRow={(record) => {
           return {

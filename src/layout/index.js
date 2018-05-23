@@ -6,13 +6,13 @@ import { Layout } from 'antd';
 // import Btn from './button/index';
 import Menu from './menu/index';
 import Login from './loginForm/index';
-import Route from './route/index';
+// import Route from './route/index';
 import Restaurant from './components/restaurant/index';
-import Category from './components/category/index';
+// import Category from './components/category/index';
 import Order from './components/orderList/index';
-import OrderItem from './components/orderItem/index';
-import AddCategory from './components/addCategory/index';
-import AddFood from './components/addFood/index';
+// import OrderItem from './components/orderItem/index';
+// import AddCategory from './components/addCategory/index';
+// import AddFood from './components/addFood/index';
 
 import Admin from './components/administator/index';
 
@@ -26,7 +26,6 @@ class LLayout extends React.Component {
   }
 
   memberSetting(key) {
-    console.log(key, typeof key);
     this.setState({
       renderComponent: key,
     });
@@ -36,20 +35,16 @@ class LLayout extends React.Component {
     let setPlane = () => {
       switch (this.state.renderComponent) {
         case '1':
-          console.log('人员管理');
           renderComponent = <Admin/>;
           break;
         case '2':
-          console.log('订单管理');
           renderComponent = <Order/>;
           break;
         case '3':
-          console.log('餐馆信息管理');
           renderComponent = <Restaurant />;
           break;
         default :
-          console.log('餐馆信息管理');
-          renderComponent = <Restaurant />;
+          renderComponent = <Order />;
       }
       return renderComponent;
     };

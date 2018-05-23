@@ -1,20 +1,85 @@
 import React from 'react';
 import css from './index.less';
 import { Form, Icon, Input, Button, Tooltip, Cascader, Select, Row, Col, Checkbox, AutoComplete } from 'antd';
+import $ from 'jquery';
 const FormItem = Form.Item;
+const config = 'http://127.0.0.1:8360';
 
 class Restaurant extends React.Component {
   constructor() {
     super();
+    this.state = {
+      name: '',
+      phone: '',
+      address: '',
+      detail: '',
+    };
   }
 
   componentDidMount() {
-    this.props.form.validateFields();
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.getRestaurantData();
   }
 
-  handleSubmit() {
+  getRestaurantData() {
+    $.ajax({
+      method: 'get',
+      url: config + '/admin/restaurant/index',
+      dataType: 'jsonp',
+      success: (res) => {
+        this.setState({
+          name: res.result[0].name,
+          phone: res.result[0].phone,
+          address: res.result[0].address,
+          detail: res.result[0].remark,
+        });
+      }
+    });
+  }
 
+  saveRestaurant() {
+    var name = this.state.name;
+    var phone = this.state.phone;
+    var address = this.state.address;
+    var detail = this.state.detail;
+
+    $.ajax({
+      method: 'get',
+      url: config + '/admin/restaurant/update',
+      data: {
+        name: this.state.name,
+        phone: this.state.phone,
+        address: this.state.address,
+        remark: this.state.detail
+      },
+      dataType: 'jsonp',
+      success: () => {
+        this.getRestaurantData();
+      }
+    });
+  }
+
+  nameChange(e) {
+    this.setState({
+      name: e.target.value
+    });
+  }
+
+  phoneChange(e) {
+    this.setState({
+      phone: e.target.value
+    });
+  }
+
+  addressChange(e) {
+    this.setState({
+      address: e.target.value
+    });
+  }
+
+  detailChange(e) {
+    this.setState({
+      detail: e.target.value
+    });
   }
 
   render() {
@@ -29,49 +94,24 @@ class Restaurant extends React.Component {
       }
     };
 
-    const { getFieldDecorator } = this.props.form;
     return (
       <div className={css.form}>
         <Form onSubmit={this.handleSubmit}>
           <FormItem label="名字" {...formItemLayout}>
-            {getFieldDecorator('name', {
-              rules: [{
-                // required: true, message: 'Please input your restaurant name',
-              }]
-            })(
-              <Input prefix={<Icon type="user" style={{color: 'rgba(0,0,0,0.25)'}}/>}/>
-            )}
+            <Input onChange={(e) => this.nameChange(e)} value={this.state.name} prefix={<Icon type="user" style={{color: 'rgba(0,0,0,0.25)'}}/>}/>
           </FormItem>
           <FormItem label="联系电话" {...formItemLayout}>
-            {getFieldDecorator('telephone', {
-              rules: [{
-                // required: true, message: 'Please input your restaurant telephone',
-              }]
-            })(
-              <Input prefix={<Icon type="phone" style={{color: 'rgba(0,0,0,0.25)'}}/>}/>
-            )}
+            <Input onChange={(e) => this.phoneChange(e)} value={this.state.phone} prefix={<Icon type="phone" style={{color: 'rgba(0,0,0,0.25)'}}/>}/>
           </FormItem>
           <FormItem label="地址" {...formItemLayout}>
-            {getFieldDecorator('address', {
-              rules: [{
-                // required: true, message: 'Please input your restaurant address',
-              }]
-            })(
-              <Input prefix={<Icon type="environment" style={{color: 'rgba(0,0,0,0.25)'}}/>}/>
-            )}
+            <Input onChange={(e) => this.addressChange(e)} value={this.state.address} prefix={<Icon type="environment" style={{color: 'rgba(0,0,0,0.25)'}}/>}/>
           </FormItem>
           <FormItem label="详情" {...formItemLayout}>
-            {getFieldDecorator('detail', {
-              rules: [{
-                // required: true, message: 'Please input your restaurant detail',
-              }]
-            })(
-              <Input.TextArea rows={4}/>
-            )}
+            <Input.TextArea onChange={(e) => this.detailChange(e)} value={this.state.detail} rows={4}/>
           </FormItem>
           <FormItem {...formItemLayout}>
             {/* 身份体验 */}
-            <Button type="danger" disabled="false">修改</Button>
+            <Button type="danger" onClick={this.saveRestaurant.bind(this)}>修改</Button>
           </FormItem>
         </Form>
       </div>
