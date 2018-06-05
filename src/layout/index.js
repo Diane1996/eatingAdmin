@@ -35,16 +35,16 @@ class LLayout extends React.Component {
     let setPlane = () => {
       switch (this.state.renderComponent) {
         case '1':
-          renderComponent = <Admin/>;
+          renderComponent = <Admin memberSetting={this.memberSetting.bind(this)}/>;
           break;
         case '2':
           renderComponent = <Order/>;
           break;
         case '3':
-          renderComponent = <Restaurant />;
+          renderComponent = <Restaurant memberSetting={this.memberSetting.bind(this)}/>;
           break;
         default :
-          renderComponent = <Order />;
+          renderComponent = <Order/>;
       }
       return renderComponent;
     };

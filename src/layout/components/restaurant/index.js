@@ -1,6 +1,6 @@
 import React from 'react';
 import css from './index.less';
-import { Form, Icon, Input, Button, Tooltip, Cascader, Select, Row, Col, Checkbox, AutoComplete } from 'antd';
+import { Form, Icon, Input, Button, Modal } from 'antd';
 import $ from 'jquery';
 const FormItem = Form.Item;
 const config = 'http://127.0.0.1:8360';
@@ -26,12 +26,27 @@ class Restaurant extends React.Component {
       url: config + '/admin/restaurant/index',
       dataType: 'jsonp',
       success: (res) => {
-        this.setState({
-          name: res.result[0].name,
-          phone: res.result[0].phone,
-          address: res.result[0].address,
-          detail: res.result[0].remark,
-        });
+        if (res === 403) {
+          var that = this;
+          Modal.info({
+            title: '提示',
+            content: (
+              <div>
+                <p>您没有权限</p>
+              </div>
+            ),
+            onOk() {
+              that.props.memberSetting('2');
+            },
+          });
+        } else {
+          this.setState({
+            name: res.result[0].name,
+            phone: res.result[0].phone,
+            address: res.result[0].address,
+            detail: res.result[0].remark,
+          });
+        }
       }
     });
   }

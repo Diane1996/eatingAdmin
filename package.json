@@ -10,6 +10,7 @@
   "dependencies": {
     "address": "^1.0.3",
     "antd": "^3.2.0",
+    "antd-mobile": "^2.1.10",
     "axios": "^0.16.2",
     "babel-polyfill": "^6.23.0",
     "classnames": "^2.2.5",

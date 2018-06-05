@@ -128,16 +128,31 @@ export default class Order extends React.Component {
       url: config + '/admin/admin/getAll',
       dataType: 'jsonp',
       success: (res) => {
-        let list = [];
-        console.log('res', res, typeof res);
-        res.result.map((item, index) => {
-          item.key = index + 1;
-          list.push(item);
-        });
-        console.log(list);
-        this.setState({
-          admin: list
-        });
+        if (res === 403) {
+          var that = this;
+          Modal.info({
+            title: '提示',
+            content: (
+              <div>
+                <p>您没有权限</p>
+              </div>
+            ),
+            onOk() {
+              that.props.memberSetting('2');
+            },
+          });
+        } else {
+          let list = [];
+          console.log('res', res, typeof res);
+          res.result.map((item, index) => {
+            item.key = index + 1;
+            list.push(item);
+          });
+          console.log(list);
+          this.setState({
+            admin: list
+          });
+        }
       }
     });
   }

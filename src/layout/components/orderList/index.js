@@ -2,8 +2,6 @@ import React from 'react';
 import { Card, Table, Button, Modal } from 'antd';
 // const Panel = Collapse.Panel;
 import $ from 'jquery';
-import axios from 'axios';
-import qs from 'qs';
 
 const config = 'http://127.0.0.1:8360';
 
@@ -53,28 +51,43 @@ export default class Order extends React.Component {
           dataIndex: 'status',
           key: 'status'
         }, {
+          title: '详情',
+          key: 'detail',
+          render: (text, record, index) => {
+            return (
+              <Button onClick={() => {
+                this.showModal(record);
+              }}>订单详情</Button>
+            );
+          }
+        }, {
           title: '',
           key: 'action',
           render: (text, record, index) => {
+            console.log('status: ', record.status);
             let actionName = '接单';
-            switch (status) {
+            switch (record.status) {
               case 1:
                 actionName = '接单';
                 break;
               case 2:
-                actionName = '开始配送';
+                if (record.eatingType === '外卖') {
+                  actionName = '开始配送';
+                } else {
+                  actionName = '结束订单';
+                }
                 break;
               case 3:
-                actionName = '订单完成';
+                actionName = '结束订单';
                 break;
               case 4:
                 actionName = '用户申请退款';
             }
             return (
-                <Button onClick={() => {
-                  this.orderAction(record);
-                  // this.handleCancel();
-                }}>{actionName}</Button>
+              <Button onClick={() => {
+                this.orderAction(record);
+                // this.handleCancel();
+              }}>{actionName}</Button>
             );
           }
         }
@@ -108,30 +121,32 @@ export default class Order extends React.Component {
           dataIndex: 'address',
           key: 'address'
         }
-      ]
+      ],
+      isHistory: false,
     };
   }
 
   showModal = (record) => {
-    // $.ajax({
-    //   method: 'get',
-    //   url: config + '/admin/order/getOneDetail?order_id=' + record.order_id,
-    //   dataType: 'jsonp',
-    //   success: (res) => {
-    //     let orderList = [];
-    //     res.orderDetail.map((item, index) => {
-    //       item.key = index + 1;
-    //       orderList.push(item);
-    //     });
-    //     this.setState({
-    //       list: orderList,
-    //       address: res.addressDetail
-    //     });
-    //   }
-    // });
-    // this.setState({
-    //   visible: true,
-    // });
+    $.ajax({
+      method: 'get',
+      url: config + '/admin/order/getOneDetail?order_id=' + record.order_id,
+      dataType: 'jsonp',
+      success: (res) => {
+        let orderList = [];
+        res.orderDetail.map((item, index) => {
+          item.key = index + 1;
+          orderList.push(item);
+        });
+        this.setState({
+          list: orderList,
+          address: res.addressDetail,
+          remark: res.orderRemark[0].remark
+        });
+      }
+    });
+    this.setState({
+      visible: true,
+    });
   };
 
   handleOk = () => {
@@ -146,45 +161,20 @@ export default class Order extends React.Component {
     });
   };
 
-  getOrderList() {
-    $.ajax({
-      method: 'get',
-      url: config + '/admin/order/getAllOrderList',
-      data: {
-        username: 'admin',
-        password: 'admin'
-      },
-      dataType: 'jsonp',
-      success: (res) => {
-        let orderList = [];
-        res.map((item, index) => {
-          item.key = index + 1;
-          item.createdTime = item.create_time;
-          item.total = item.total_price;
-          // switch (item.status) {
-          //   case 1:
-          //     item.status = '已付款';
-          //
-          // }
-          orderList.push(item);
-        });
-        console.log(orderList);
-        this.setState({
-          orderList: orderList
-        });
-      }
-    });
-  }
-
   componentDidMount() {
     this.getOrderList();
     // 定时获取最新内容
     let timer;
     let repeat;
-    // setTimeout(repeat = () => {
-    //   setTimeout(repeat, 5000);
-    //   this.getOrderList();
-    // }, 5000);
+    setTimeout(repeat = () => {
+      setTimeout(repeat, 1000);
+      var isHistory = this.state.isHistory;
+      if (isHistory) {
+        this.getHistory();
+      } else {
+        this.getOrderList();
+      }
+    }, 1000);
   }
 
   endOrder(record) {
@@ -197,19 +187,28 @@ export default class Order extends React.Component {
 
   orderAction(item) {
     console.log('item: ', item.status);
-    let code;
+    let code, tips;
     switch (item.status) {
       case 1:
         // 接单
         code = ORDER_CODE.RECEIVE;
+        tips = '已接单';
         break;
       case 2:
-        // 开始配送
-        code = ORDER_CODE.RECEIVE;
+        if (item.eatingType === '外卖') {
+          // 开始配送
+          code = ORDER_CODE.DELIVER;
+          tips = '开始配送';
+        } else {
+          // 订单完成
+          code = ORDER_CODE.END;
+          tips = '订单已完成';
+        }
         break;
       case 3:
         // 订单完成
-        code = ORDER_CODE.RECEIVE;
+        code = ORDER_CODE.END;
+        tips = '订单已完成';
         break;
       case 4:
         // 用户申请退款(同意，拒绝)
@@ -225,10 +224,192 @@ export default class Order extends React.Component {
       },
       dataType: 'jsonp',
       success: (res) => {
-        this.getOrderList();
-        console.log('success:', res);
+        var that = this;
+        Modal.info({
+          title: '提示',
+          content: (
+            <div>
+              <p>{tips}</p>
+            </div>
+          ),
+          onOk() {
+            this.getOrderList();
+          },
+        });
       }
     });
+  }
+
+  getOrderList() {
+    this.setState({
+      columns: [
+        {
+          title: '交易时间',
+          dataIndex: 'createdTime',
+          key: 'createdTime'
+        }, {
+          title: '用户名',
+          dataIndex: 'username',
+          key: 'username'
+        }, {
+          title: '用户Id',
+          dataIndex: 'open_id',
+          key: 'open_id'
+        }, {
+          title: '进餐类型',
+          dataIndex: 'eatingType',
+          key: 'eatingType'
+        }, {
+          title: '总价',
+          dataIndex: 'total',
+          key: 'total'
+        }, {
+          title: '订单状态',
+          dataIndex: 'status',
+          key: 'status'
+        }, {
+          title: '详情',
+          key: 'detail',
+          render: (text, record, index) => {
+            return (
+              <Button onClick={() => {
+                this.showModal(record);
+              }}>订单详情</Button>
+            );
+          }
+        }, {
+          title: '',
+          key: 'action',
+          render: (text, record, index) => {
+            let actionName = '接单';
+            switch (record.status) {
+              case 1:
+                actionName = '接单';
+                break;
+              case 2:
+                if (record.eatingType === '外卖') {
+                  actionName = '开始配送';
+                } else {
+                  actionName = '结束订单';
+                }
+                break;
+              case 3:
+                actionName = '结束订单';
+                break;
+              case 4:
+                actionName = '用户申请退款';
+            }
+            return (
+              <Button onClick={() => {
+                this.orderAction(record);
+              }}>{actionName}</Button>
+            );
+          }
+        }
+      ],
+    });
+    $.ajax({
+      method: 'get',
+      url: config + '/admin/order/getAllOrderList',
+      data: {
+        username: 'admin',
+        password: 'admin'
+      },
+      dataType: 'jsonp',
+      success: (res) => {
+        if (res) {
+          let orderList = [];
+          res.map((item, index) => {
+            item.key = index + 1;
+            item.createdTime = item.create_time;
+            item.total = item.total_price;
+            orderList.push(item);
+          });
+          this.setState({
+            orderList: orderList
+          });
+        } else {
+          this.setState({
+            orderList: []
+          });
+        }
+      }
+    });
+  }
+
+  getHistory() {
+    this.setState({
+      columns: [
+        {
+          title: '交易时间',
+          dataIndex: 'createdTime',
+          key: 'createdTime'
+        }, {
+          title: '用户名',
+          dataIndex: 'username',
+          key: 'username'
+        }, {
+          title: '用户Id',
+          dataIndex: 'open_id',
+          key: 'open_id'
+        }, {
+          title: '进餐类型',
+          dataIndex: 'eatingType',
+          key: 'eatingType'
+        }, {
+          title: '总价',
+          dataIndex: 'total',
+          key: 'total'
+        }, {
+          title: '订单状态',
+          dataIndex: 'status',
+          key: 'status'
+        }, {
+          title: '详情',
+          key: 'detail',
+          render: (text, record, index) => {
+            return (
+              <Button onClick={() => {
+                this.showModal(record);
+              }}>订单详情</Button>
+            );
+          }
+        }
+      ],
+    });
+    $.ajax({
+      method: 'get',
+      url: config + '/admin/order/getHistoryOrderList',
+      data: {
+        username: 'admin',
+        password: 'admin'
+      },
+      dataType: 'jsonp',
+      success: (res) => {
+        let orderList = [];
+        res.map((item, index) => {
+          item.key = index + 1;
+          item.createdTime = item.create_time;
+          item.total = item.total_price;
+          orderList.push(item);
+        });
+        this.setState({
+          orderList: orderList
+        });
+      }
+    });
+  }
+
+  toggleHistory() {
+    var isHistory = this.state.isHistory;
+    this.setState({
+      isHistory: isHistory = isHistory ? false : true,
+    });
+    if (isHistory) {
+      this.getHistory();
+    } else {
+      this.getOrderList();
+    }
   }
 
   render() {
@@ -240,22 +421,21 @@ export default class Order extends React.Component {
 
     return (
       <div>
+        <Button onClick={this.toggleHistory.bind(this)}>{this.state.isHistory ? '已完成订单' : '未完成订单'}</Button>
         <Modal
           title="点单列表"
           visible={this.state.visible}
           onOk={this.handleOk}
           onCancel={this.handleCancel}
         >
-          <Table dataSource={this.state.list} columns={this.state.orderColumns}/>
-          <Table dataSource={this.state.address} columns={this.state.addressColumns}/>
+          <Table dataSource={this.state.list} columns={this.state.orderColumns} pagination={false}/>
+          <Table dataSource={this.state.address} columns={this.state.addressColumns} pagination={false}/>
+          <div>
+            <div>备注</div>
+            <div>{this.state.remark}</div>
+          </div>
         </Modal>
-        <Table dataSource={this.state.orderList} columns={this.state.columns} onRow={(record) => {
-          return {
-            onClick: () => {
-              this.showModal(record);
-            }
-          };
-        }}/>
+        <Table dataSource={this.state.orderList} columns={this.state.columns} pagination={false}/>
       </div>
     );
   }
