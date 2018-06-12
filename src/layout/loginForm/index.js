@@ -26,9 +26,9 @@ class LoginForm extends React.Component {
     this.props.form.validateFields();
     this.handleSubmit = this.handleSubmit.bind(this);
     $.ajax({
-      method: 'get',
+      method: 'post',
       url: config + '/admin/login/getLoginState',
-      dataType: 'jsonp',
+      // dataType: 'jsonp',
       success: (res) => {
         if (res.username) {
           this.setState({

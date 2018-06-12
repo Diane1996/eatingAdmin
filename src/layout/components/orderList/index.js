@@ -166,15 +166,15 @@ export default class Order extends React.Component {
     // 定时获取最新内容
     let timer;
     let repeat;
-    setTimeout(repeat = () => {
-      setTimeout(repeat, 1000);
-      var isHistory = this.state.isHistory;
-      if (isHistory) {
-        this.getHistory();
-      } else {
-        this.getOrderList();
-      }
-    }, 1000);
+    // setTimeout(repeat = () => {
+    //   setTimeout(repeat, 1000);
+    //   var isHistory = this.state.isHistory;
+    //   if (isHistory) {
+    //     this.getHistory();
+    //   } else {
+    //     this.getOrderList();
+    //   }
+    // }, 1000);
   }
 
   endOrder(record) {
@@ -311,15 +311,11 @@ export default class Order extends React.Component {
     $.ajax({
       method: 'get',
       url: config + '/admin/order/getAllOrderList',
-      data: {
-        username: 'admin',
-        password: 'admin'
-      },
-      dataType: 'jsonp',
+      // dataType: 'jsonp',
       success: (res) => {
         if (res) {
           let orderList = [];
-          res.map((item, index) => {
+          res.data.map((item, index) => {
             item.key = index + 1;
             item.createdTime = item.create_time;
             item.total = item.total_price;
